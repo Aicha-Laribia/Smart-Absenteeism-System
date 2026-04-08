@@ -46,8 +46,6 @@ Uses **OLS Regression Curves** and **Impact Disks** to prove the causality betwe
 
 ![Deep Dive Analysis](assets/image4.png)
 
-###  Student Voices
-A sentiment analysis section that humanizes the data with direct quotes from the field.
 
 ### 🤖 Predictive AI Robot
 An early-warning diagnostic tool. By inputting 7 key parameters, the "Robot" calculates a precise **Risk Score** to help teachers prioritize interventions.
