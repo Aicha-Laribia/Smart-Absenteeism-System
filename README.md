@@ -68,4 +68,4 @@ An early-warning diagnostic tool. By inputting 7 key parameters, the "Robot" cal
 1. Clone this repository.
 2. Install the dependencies in uv.lock:
    ```bash
-   pip install streamlit pandas plotly numpy
+   pip install streamlit pandas plotly  seaborn statsmodels matplotlib
