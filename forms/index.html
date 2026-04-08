@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>استبيان الغياب المدرسي · Enquête Absentéisme</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root{
+          --ink:#1a1a2e;--paper:#faf8f4;--accent:#c8522a;--accent2:#2a6c8e;
+          --soft:#f0ece4;--muted:#7a7069;--border:#ddd8ce;
+          --green:#1d6b4a;--amber:#c07a14;--red:#b83232;
+        }
+        *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+        html,body{height:100%;font-size:16px}
+        body{ font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink); min-height:100vh; }
+        .app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+        .lang-screen{ flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center; padding:2rem 1.5rem;text-align:center; }
+        .school-emblem{ width:72px;height:72px;border-radius:16px;background:var(--accent); display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem; }
+        .school-emblem svg{width:36px;height:36px;fill:white}
+        .school-name{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.35rem}
+        .survey-title{font-size:22px;font-weight:600;color:var(--ink);line-height:1.3;margin-bottom:.5rem}
+        .survey-arabic{font-family:'Tajawal',sans-serif;font-size:14px;color:var(--muted);direction:rtl;margin-bottom:2rem}
+        .lang-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+        .lang-btn{ border:1.5px solid var(--border);border-radius:14px;padding:1.1rem .75rem; background:white;cursor:pointer;transition:all .2s;text-align:center; }
+        .lang-btn:active{transform:scale(.97)}
+        .lang-flag{font-size:28px;display:block;margin-bottom:6px}
+        .survey-screen{flex:1;display:none;flex-direction:column}
+        .survey-screen.active{display:flex}
+        .top-bar{ padding:.875rem 1.25rem .75rem; border-bottom:1px solid var(--border); display:flex;align-items:center;justify-content:space-between; background:white;position:sticky;top:0;z-index:10; }
+        .lang-pill{ font-size:10px;font-weight:600;color:var(--accent2); border:1px solid var(--accent2);border-radius:6px;padding:2px 7px; cursor:pointer; }
+        .prog-wrap{height:3px;background:var(--soft);overflow:hidden}
+        .prog-bar{height:100%;background:var(--accent);transition:width .5s ease}
+        .q-body{flex:1;overflow-y:auto;padding:1.25rem}
+        .q-section{display:none}
+        .q-section.active{display:block;animation:fadeUp .28s ease}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        .section-chip{ display:inline-flex;align-items:center;gap:5px; background:var(--soft);border-radius:20px;padding:4px 12px; font-size:11px;font-weight:600;color:var(--muted); margin-bottom:.875rem;text-transform:uppercase }
+        .q-block{margin-bottom:1.5rem}
+        .q-label{font-size:15px;font-weight:500;color:var(--ink);line-height:1.45;margin-bottom:.875rem}
+        .level-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+        .level-btn{ border:1.5px solid var(--border);border-radius:10px;padding:.625rem .25rem; background:white;cursor:pointer; }
+        .level-btn.sel{border-color:var(--accent);background:#fdf1ec;color:var(--accent)}
+        .yn-row{display:flex;gap:8px;flex-wrap:wrap;}
+        .yn-btn{ flex:1;border:1.5px solid var(--border);border-radius:10px;padding:.75rem; background:white;cursor:pointer; display:flex;align-items:center;justify-content:center;gap:6px; min-width:80px; }
+        .yn-btn.sel-yes{border-color:var(--green);background:#eef7f2;color:var(--green)}
+        .yn-btn.sel-no{border-color:var(--red);background:#fdf0f0;color:var(--red)}
+        .yn-btn.sel-gen{border-color:var(--accent2);background:#eef4f8;color:var(--accent2)}
+        .tag-grid{display:flex;flex-wrap:wrap;gap:8px}
+        .tag-item{ border:1.5px solid var(--border);border-radius:20px;padding:.5rem .875rem; background:white;cursor:pointer; font-size:13px; transition: 0.2s; }
+        .tag-item.sel{border-color:var(--accent);background:#fdf1ec;color:var(--accent);font-weight:600}
+        .open-textarea{ width:100%;border:1.5px solid var(--border);border-radius:12px; padding:.875rem 1rem;font-size:14px; font-family:'Tajawal',sans-serif; background:white;resize:none; }
+        .nav-bar{ padding:.875rem 1.25rem;border-top:1px solid var(--border); display:flex;justify-content:space-between; align-items:center; background:white;position:sticky;bottom:0 }
+        .btn-next{ padding:.625rem 1.5rem;border:none;border-radius:10px; background:var(--accent);cursor:pointer; font-weight:600; color:white; min-width:100px; }
+        .btn-next:disabled{opacity:0.3; cursor:not-allowed;}
+        .done-screen{ flex:1;display:none;flex-direction:column;align-items:center; justify-content:center;padding:2rem 1.5rem;text-align:center }
+        .done-screen.active{display:flex}
+    </style>
+</head>
+<body>
+<div class="app">
+
+<div class="lang-screen" id="screen-lang">
+    <div class="school-emblem"><svg viewBox="0 0 24 24"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/></svg></div>
+    <div class="school-name">مدرسة 18 نونبر · فاس</div>
+    <div class="survey-title">Absenteeism Detection System</div>
+    <div class="survey-arabic">نظام رصد الغياب المدرسي</div>
+    <div class="lang-btns">
+        <button class="lang-btn fr" onclick="startSurvey('fr')"><span class="lang-flag">🇫🇷</span><div>Français</div></button>
+        <button class="lang-btn ar" onclick="startSurvey('ar')"><span class="lang-flag">🇲🇦</span><div style="font-family:'Tajawal',sans-serif">الدارجة</div></button>
+    </div>
+</div>
+
+<div class="survey-screen" id="screen-survey">
+    <div class="top-bar">
+        <div class="top-school" id="top-school-lbl">École 18 Nov</div>
+        <div class="top-right">
+            <button class="lang-pill" onclick="goBack2Lang()" id="lang-pill-lbl">FR</button>
+            <span class="step-count" id="step-count-lbl">1/7</span>
+        </div>
+    </div>
+    <div class="prog-wrap"><div class="prog-bar" id="prog-bar" style="width:14%"></div></div>
+
+    <div class="q-body" id="q-body">
+        <div class="q-section active" id="sec1">
+            <div class="section-chip">🎒 <span id="chip1">Profil</span></div>
+            <div class="q-block">
+                <div class="q-label" id="q-level-lbl">Niveau ?</div>
+                <div class="level-grid" id="level-btns-container">
+                    <button class="level-btn" onclick="pickLevel(this)">1</button>
+                    <button class="level-btn" onclick="pickLevel(this)">2</button>
+                    <button class="level-btn" onclick="pickLevel(this)">3</button>
+                    <button class="level-btn" onclick="pickLevel(this)">4</button>
+                    <button class="level-btn" onclick="pickLevel(this)">5</button>
+                    <button class="level-btn" onclick="pickLevel(this)">6</button>
+                </div>
+            </div>
+            <div class="q-block">
+                <div class="q-label" id="q-gender-lbl">Sexe :</div>
+                <div class="yn-row">
+                    <button class="yn-btn" onclick="pickSingle(this,'gender','sel-gen')"><span id="g-boy">Garçon</span></button>
+                    <button class="yn-btn" onclick="pickSingle(this,'gender','sel-gen')"><span id="g-girl">Fille</span></button>
+                </div>
+            </div>
+            <div class="nav-bar"><span></span><button class="btn-next" id="next1" disabled onclick="goTo(2)"><span id="next-lbl-1">Suivant</span></button></div>
+        </div>
+
+        <div class="q-section" id="sec2">
+            <div class="section-chip">🚶 <span id="chip2">Logistique</span></div>
+            <div class="q-block">
+                <div class="q-label" id="q-dist-lbl">Comment viens-tu à l'école ?</div>
+                <div class="yn-row">
+                    <button class="yn-btn" onclick="pickSingle(this,'transport','sel-gen')"><span id="tr1">A pied</span></button>
+                    <button class="yn-btn" onclick="pickSingle(this,'transport','sel-gen')"><span id="tr2">Transport</span></button>
+                </div>
+            </div>
+            <div class="q-block">
+                <div class="q-label" id="q-sleep-lbl">Dors-tu bien la nuit ?</div>
+                <div class="yn-row">
+                    <button class="yn-btn" onclick="pickSingle(this,'sleep','sel-yes')"><span id="sl1">Oui</span></button>
+                    <button class="yn-btn" onclick="pickSingle(this,'sleep','sel-no')"><span id="sl2">Non</span></button>
+                </div>
+            </div>
+            <div class="nav-bar"><button class="btn-back" onclick="goTo(1)"><span id="back-lbl-2">Retour</span></button><button class="btn-next" id="next2" disabled onclick="goTo(3)"><span id="next-lbl-2">Suivant</span></button></div>
+        </div>
+
+        <div class="q-section" id="sec3">
+            <div class="section-chip">📅 <span id="chip3">Fréquence</span></div>
+            <div class="q-block">
+                <div class="q-label" id="q-abs-lbl">Jours manqués ?</div>
+                <div class="yn-row">
+                    <button class="yn-btn" onclick="pickSingle(this,'absdays','sel-yes')"><span id="ad0">0</span></button>
+                    <button class="yn-btn" onclick="pickSingle(this,'absdays','sel-gen')"><span id="ad1">1-2</span></button>
+                    <button class="yn-btn" onclick="pickSingle(this,'absdays','sel-no')"><span id="ad2">3+</span></button>
+                </div>
+            </div>
+            <div class="q-block">
+                <div class="q-label" id="q-pattern-lbl">Quand ?</div>
+                <div class="yn-row">
+                    <button class="yn-btn" onclick="pickSingle(this,'pattern','sel-gen')"><span id="pt1">Lundi</span></button>
+                    <button class="yn-btn" onclick="pickSingle(this,'pattern','sel-gen')"><span id="pt2">Vendredi</span></button>
+                    <button class="yn-btn" onclick="pickSingle(this,'pattern','sel-gen')"><span id="pt3">Aléatoire</span></button>
+                </div>
+            </div>
+            <div class="nav-bar"><button class="btn-back" onclick="goTo(2)"><span id="back-lbl-3">Retour</span></button><button class="btn-next" id="next3" disabled onclick="goTo(4)"><span id="next-lbl-3">Suivant</span></button></div>
+        </div>
+
+        <div class="q-section" id="sec4">
+            <div class="section-chip">🤔 <span id="chip4">Raisons</span></div>
+            <div class="q-block">
+                <div class="q-label" id="q-reasons-lbl">Pourquoi ?</div>
+                <div class="tag-grid" id="reason-tags"></div>
+            </div>
+            <div class="nav-bar"><button class="btn-back" onclick="goTo(3)"><span id="back-lbl-4">Retour</span></button><button class="btn-next" id="next4" disabled onclick="goTo(5)"><span id="next-lbl-4">Suivant</span></button></div>
+        </div>
+
+        <div class="q-section" id="sec5">
+            <div class="section-chip">📖 <span id="chip5">Études</span></div>
+            <div class="q-block">
+                <div class="q-label" id="q-understand-lbl">Comprends-tu ?</div>
+                <div class="yn-row">
+                    <button class="yn-btn" onclick="pickSingle(this,'understand','sel-yes')"><span id="un1">Oui</span></button>
+                    <button class="yn-btn" onclick="pickSingle(this,'understand','sel-gen')"><span id="un2">Parfois</span></button>
+                    <button class="yn-btn" onclick="pickSingle(this,'understand','sel-no')"><span id="un3">Non</span></button>
+                </div>
+            </div>
+            <div class="q-block">
+                <div class="q-label" id="q-catch-lbl">Dur de rattraper ?</div>
+                <div class="yn-row">
+                    <button class="yn-btn" onclick="pickSingle(this,'catchup','sel-no')"><span id="cu1">Oui</span></button>
+                    <button class="yn-btn" onclick="pickSingle(this,'catchup','sel-yes')"><span id="cu2">Non</span></button>
+                </div>
+            </div>
+            <div class="nav-bar"><button class="btn-back" onclick="goTo(4)"><span id="back-lbl-5">Retour</span></button><button class="btn-next" id="next5" disabled onclick="goTo(6)"><span id="next-lbl-5">Suivant</span></button></div>
+        </div>
+
+        <div class="q-section" id="sec6">
+            <div class="section-chip">😊 <span id="chip6">Climat</span></div>
+            <div class="q-block">
+                <div class="q-label" id="q-safe-lbl">Sécurité ?</div>
+                <div class="yn-row">
+                    <button class="yn-btn" onclick="pickSingle(this,'safe','sel-yes')"><span id="sf1">Oui</span></button>
+                    <button class="yn-btn" onclick="pickSingle(this,'safe','sel-no')"><span id="sf2">Non</span></button>
+                </div>
+            </div>
+            <div class="q-block">
+                <div class="q-label" id="q-friend-lbl">Amis ?</div>
+                <div class="yn-row">
+                    <button class="yn-btn" onclick="pickSingle(this,'peers','sel-gen')"><span id="pr1">Oui</span></button>
+                    <button class="yn-btn" onclick="pickSingle(this,'peers','sel-yes')"><span id="pr2">Non</span></button>
+                </div>
+            </div>
+            <div class="nav-bar"><button class="btn-back" onclick="goTo(5)"><span id="back-lbl-6">Retour</span></button><button class="btn-next" id="next6" disabled onclick="goTo(7)"><span id="next-lbl-6">Suivant</span></button></div>
+        </div>
+
+        <div class="q-section" id="sec7">
+            <div class="section-chip">✏️ <span id="chip7">Voix</span></div>
+            <div class="q-block">
+                <div class="q-label" id="q-open-lbl">Message ?</div>
+                <textarea class="open-textarea" rows="5" id="open-ans"></textarea>
+            </div>
+            <div class="nav-bar"><button class="btn-back" onclick="goTo(6)"><span id="back-lbl-7">Retour</span></button><button class="btn-next" style="background:var(--green)" onclick="submitSurvey()"><span id="next-lbl-7">Envoyer</span></button></div>
+        </div>
+    </div>
+</div>
+
+<div class="done-screen" id="screen-done">
+    <span class="done-star">⭐</span>
+    <div class="done-title" id="done-title">Merci !</div>
+    <div class="done-sub" id="done-sub">Tes réponses sont enregistrées.</div>
+</div>
+
+</div>
+
+<script>
+const TRANSLATIONS = {
+    fr: {
+        school: "École 18 Nov",
+        chips: ["Profil", "Logistique", "Fréquence", "Raisons", "Études", "Climat", "Ta voix"],
+        qLevel: "Niveau scolaire ?", 
+        qGender: "Sexe :", 
+        gBoy: "👦 Garçon", gGirl: "👧 Fille",
+        qDist: "Comment viens-tu à l'école ?", tr1: "À pied", tr2: "Transport",
+        qSleep: "Dors-tu bien la nuit ?", sl1: "Oui", sl2: "Non",
+        qAbs: "Jours manqués ce mois ?", ad0: "0", ad1: "1-2", ad2: "3+",
+        qPattern: "Quand manques-tu le plus ?", pt1: "Lundi", pt2: "Vendredi", pt3: "Aléatoire",
+        qReason: "Pourquoi manques-tu l'école ?", reasonTags: ["Maladie", "Transport", "Problème famille", "Peur", "Fatigue", "Je ne comprends pas"],
+        qUnder: "Comprends-tu les leçons ?", un1: "Oui", un2: "Parfois", un3: "Non",
+        qCatch: "Dur de rattraper ?", cu1: "Oui", cu2: "Non",
+        qSafe: "Te sens-tu en sécurité ?", sf1: "Oui", sf2: "Non",
+        qFriend: "Tes amis s'absentent aussi ?", pr1: "Oui", pr2: "Non",
+        qOpen: "Un message pour ?", next: "Suivant", back: "Retour", send: "Envoyer",
+        doneT: "Merci !", doneS: "Tes réponses vont aider l'école.", placeholder: "Écris ici..."
+    },
+    ar: {
+        school: "مدرسة 18 نونبر",
+        chips: ["هوية التلميذ", "النقل والنوم", "شحال كتغيب", "علاش كتغيب", "القراية", "الجو فالمدرسة", "صوتك مهم"],
+        qLevel: "فأشمن مستوى نتا؟", 
+        qGender: "الجنس :", 
+        gBoy: "👦 ولد", gGirl: "👧 بنت",
+        qDist: "كيفاش كتجي للمدرسة؟", tr1: "على رجلي", tr2: "فالنقل",
+        qSleep: "واش كتنعس مزيان فالليل؟", sl1: "إيه", sl2: "لا",
+        qAbs: "شحال من نهار غبتي هاد الشهر؟", ad0: "0", ad1: "1-2", ad2: "3+",
+        qPattern: "فوقاش كتغيب بزاف؟", pt1: "الاتنين", pt2: "الجمعة", pt3: "مرة مرة وصافي",
+        qReason: "علاش كتغيب على المدرسة؟", reasonTags: ["مريض", "مشكل فالنقل", "مشكل فالعائلة", "خايف", "عيان", "ماكنفهمش الدروس"],
+        qUnder: "واش كتفهم الدروس دغيا؟", un1: "إه", un2: "شي مرات", un3: "لا",
+        qCatch: "واش صعيب تلحق الدروس؟", cu1: "إه", cu2: "لا",
+        qSafe: "واش كتحس براسك فأمان؟", sf1: "إه", sf2: "لا",
+        qFriend: "واش حتى صحابك كيغيبو؟", pr1: "إه", pr2: "لا",
+        qOpen: "شي رسالة ؟", next: "التالي", back: "رجوع", send: "صيفط",
+        doneT: "شكراً لك!", doneS: "إجاباتك غادي تساعدنا نحسنو المدرسة.", placeholder: "كتب هنا..."
+    }
+};
+
+let currentLang='fr', currentSec=1, totalSecs=7;
+const answers = { reasons: [] };
+
+function applyLanguage(lang) {
+    const t = TRANSLATIONS[lang];
+    const isAr = lang === 'ar';
+    document.documentElement.dir = isAr ? 'rtl' : 'ltr';
+    document.getElementById('top-school-lbl').innerText = t.school;
+    document.getElementById('lang-pill-lbl').innerText = lang.toUpperCase();
+    
+    for(let i=1; i<=7; i++) document.getElementById('chip'+i).innerText = t.chips[i-1];
+    document.getElementById('q-level-lbl').innerText = t.qLevel;
+    document.getElementById('q-gender-lbl').innerText = t.qGender;
+    document.getElementById('q-dist-lbl').innerText = t.qDist;
+    document.getElementById('q-sleep-lbl').innerText = t.qSleep;
+    document.getElementById('q-abs-lbl').innerText = t.qAbs;
+    document.getElementById('q-pattern-lbl').innerText = t.qPattern;
+    document.getElementById('q-reasons-lbl').innerText = t.qReason;
+    document.getElementById('q-understand-lbl').innerText = t.qUnder;
+    document.getElementById('q-catch-lbl').innerText = t.qCatch;
+    document.getElementById('q-safe-lbl').innerText = t.qSafe;
+    document.getElementById('q-friend-lbl').innerText = t.qFriend;
+    document.getElementById('q-open-lbl').innerText = t.qOpen;
+
+    document.getElementById('g-boy').innerText = t.gBoy;
+    document.getElementById('g-girl').innerText = t.gGirl;
+    document.getElementById('tr1').innerText = t.tr1;
+    document.getElementById('tr2').innerText = t.tr2;
+    document.getElementById('sl1').innerText = t.sl1;
+    document.getElementById('sl2').innerText = t.sl2;
+    document.getElementById('ad0').innerText = t.ad0;
+    document.getElementById('ad1').innerText = t.ad1;
+    document.getElementById('ad2').innerText = t.ad2;
+    document.getElementById('pt1').innerText = t.pt1;
+    document.getElementById('pt2').innerText = t.pt2;
+    document.getElementById('pt3').innerText = t.pt3;
+    document.getElementById('un1').innerText = t.un1;
+    document.getElementById('un2').innerText = t.un2;
+    document.getElementById('un3').innerText = t.un3;
+    document.getElementById('cu1').innerText = t.cu1;
+    document.getElementById('cu2').innerText = t.cu2;
+    document.getElementById('sf1').innerText = t.sf1;
+    document.getElementById('sf2').innerText = t.sf2;
+    document.getElementById('pr1').innerText = t.pr1;
+    document.getElementById('pr2').innerText = t.pr2;
+
+    for(let i=1; i<=7; i++) {
+        const nextBtn = document.getElementById('next-lbl-'+i);
+        const backBtn = document.getElementById('back-lbl-'+i);
+        if(nextBtn) nextBtn.innerText = (i===7) ? t.send : t.next;
+        if(backBtn) backBtn.innerText = t.back;
+    }
+    document.getElementById('open-ans').placeholder = t.placeholder;
+    buildTags('reason-tags', t.reasonTags);
+}
+
+function startSurvey(lang){
+    currentLang = lang;
+    applyLanguage(lang);
+    document.getElementById('screen-lang').style.display='none';
+    document.getElementById('screen-survey').classList.add('active');
+    goTo(1);
+}
+
+function buildTags(containerId, items){
+    const el = document.getElementById(containerId);
+    el.innerHTML = '';
+    items.forEach(txt => {
+        const b = document.createElement('button');
+        b.className = 'tag-item'; 
+        if(answers.reasons.includes(txt)) b.classList.add('sel');
+        b.textContent = txt;
+        b.onclick = () => {
+            b.classList.toggle('sel');
+            if(b.classList.contains('sel')) answers.reasons.push(txt);
+            else answers.reasons = answers.reasons.filter(x => x !== txt);
+            document.getElementById('next4').disabled = (answers.reasons.length === 0);
+        };
+        el.appendChild(b);
+    });
+}
+
+function pickLevel(btn){
+    document.querySelectorAll('.level-btn').forEach(b=>b.classList.remove('sel'));
+    btn.classList.add('sel');
+    answers.level = btn.innerText;
+    checkNav(1);
+}
+
+function pickSingle(btn, group, cls){
+    btn.parentElement.querySelectorAll('.yn-btn').forEach(b=>b.classList.remove('sel-yes','sel-no','sel-gen'));
+    btn.classList.add(cls);
+    answers[group] = btn.innerText;
+    checkNav(currentSec);
+}
+
+function checkNav(sec){
+    const btn = document.getElementById('next'+sec);
+    if(!btn) return;
+    if(sec === 1) btn.disabled = !(answers.level && answers.gender);
+    if(sec === 2) btn.disabled = !(answers.transport && answers.sleep);
+    if(sec === 3) btn.disabled = !(answers.absdays && answers.pattern);
+    if(sec === 5) btn.disabled = !(answers.understand && answers.catchup);
+    if(sec === 6) btn.disabled = !(answers.safe && answers.peers);
+}
+
+function goTo(n){
+    document.querySelectorAll('.q-section').forEach(s=>s.classList.remove('active'));
+    document.getElementById('sec'+n).classList.add('active');
+    currentSec = n;
+    document.getElementById('step-count-lbl').innerText = n + "/7";
+    document.getElementById('prog-bar').style.width = (n/7)*100 + "%";
+    document.getElementById('q-body').scrollTop = 0;
+}
+
+function submitSurvey(){
+    answers.open = document.getElementById('open-ans').value;
+    fetch("https://formspree.io/f/xreoywvn", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...answers, language: currentLang })
+    }).then(() => {
+        document.getElementById('screen-survey').style.display = 'none';
+        document.getElementById('screen-done').classList.add('active');
+        document.getElementById('done-title').innerText = TRANSLATIONS[currentLang].doneT;
+        document.getElementById('done-sub').innerText = TRANSLATIONS[currentLang].doneS;
+    });
+}
+
+function goBack2Lang(){ location.reload(); }
+</script>
+</body>
+</html>
