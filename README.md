@@ -9,7 +9,7 @@ This system was developed for **18 November School (Fes, Morocco)** to address t
 
 ---
 
-## 🛰️ The Data Journey
+##  The Data Journey
 
 ### 1. Data Collection
 Real-time field data was collected directly from 31 students using a custom-built digital platform.
@@ -23,7 +23,7 @@ The raw data was cleaned and transformed into a structured format (`cleaned_data
 
 ---
 
-## 🖥️ Application Architecture
+##  Application Architecture
 
 The dashboard is built using **Streamlit** with a professional **Light Theme** and full **RTL** support for Arabic users.
 
@@ -47,7 +47,7 @@ Uses **OLS Regression Curves** and **Impact Disks** to prove the causality betwe
 ![Deep Dive Analysis](assets/image4.png)
 
 
-### 🤖 Predictive AI Robot
+###  Predictive AI Robot
 An early-warning diagnostic tool. By inputting 7 key parameters, the "Robot" calculates a precise **Risk Score** to help teachers prioritize interventions.
 
 ![Predictive AI Robot](assets/image5.png)
